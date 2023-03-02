@@ -1,7 +1,7 @@
 import pygame as pg
 from pygame.locals import *
 
-pg.init()
+pg.init() 
 
 global WIDTH, HEIGHT
 WIDTH = 1400
@@ -23,13 +23,50 @@ def draw_grid():
 
 class Player():
     def __init__(self, x, y):
-        img = pg.image.load('spiller.png')
-        self.image = pg.transform.scale(img, (100, 100))
+        self.image_right = []
+        self.index = 0
+        self.counter = 0
+        for i in range(1,3):
+            img_right = pg.image.load(f'Zombie0{i}.png')
+            img_right = pg.transform.scale(img_right(100,100))
+            self.images_right.append(img_right)
+        self.image = self.image_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.vel_y = 0
+        self.jumped = False
 
     def update(self):
+        #delta x og delta y
+        dx = 0
+        dy = 0
+        
+        key = pg.key.get_pressed()
+        if key[pg.K_SPACE] and self.jumped == False:
+            self.vel_y  = -15
+            self.jumped = True
+        if key[pg.K_SPACE] == False:
+            self.jumped = False
+        if key[pg.K_LEFT]:
+            dx -= 5
+        if key[pg.K_RIGHT]:
+            dx += 5
+        
+        #legger til gravitet
+        self.vel_y += 1
+        if self.vel_y > 10:
+            self.vel_y = 10
+        
+        dy += self.vel_y
+        
+        self.rect.x += dx
+        self.rect.y += dy
+        
+        if self.rect.bottom > HEIGHT:
+            self.rect.bottom = HEIGHT
+            dy = 0
+        
         surface.blit(self.image, self.rect)
 
 class World():
@@ -85,6 +122,9 @@ world = World(world_data)
 
 run = True
 while run == True:
+    
+    clock.tick(FPS)
+    
     surface.blit(bb, (0, 0))
     
     world.draw()
