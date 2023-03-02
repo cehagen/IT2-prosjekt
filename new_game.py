@@ -102,4 +102,4 @@ while run == True:
 pg.quit()
 
 #Hello, ser du dette?
-NO
+#NO
