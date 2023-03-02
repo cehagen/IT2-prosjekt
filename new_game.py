@@ -100,6 +100,3 @@ while run == True:
     pg.display.update()
             
 pg.quit()
-
-#Hello, ser du dette?
-#NO
