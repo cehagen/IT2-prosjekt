@@ -38,6 +38,8 @@ class Player():
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        self.width = self.image.get.width()
+        self.height = self.image.get.height()
         self.vel_y = 0
         self.jumped = False
         self.direction = 0                                      #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
@@ -82,12 +84,33 @@ class Player():
             if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
                 self.image = self.images_left[self.index]
         
-        #legger til gravitasjon
+        #legger til gravitasjonskraft
         self.vel_y += 1
         if self.vel_y > 10:
             self.vel_y = 10
-        
         dy += self.vel_y
+        
+        #Sjekker for kollisjoner mellom avataren og blokkene
+        for tile in world.tile_list:
+            
+            # Man må sjekke for kollisjon i x- og i y-retning hver for seg for å få ønskelig resultat
+            # Sjekker for kollisjon i x-retningen
+            if tile[1].colliderect(self.rext.x + dx, self.rect.y, self.width, self.height): # dx er x-avstanden avataren skal flytte seg
+                dx = 0 # Dersom avataren kolliderer med en blokk i x-retning, blir farten lik 0, så man ikke kan gå gjennom blokken
+            
+            #Sjekker for kollisjon i y-retningen
+            # Bruker colliderect()-funksjonen fordi alle objektene er rektangler
+            if tile[1].colliderect(self.rext.x, self.rect.y + dy, self.width, self.height): # dy er y-avstanden avataren skal flytte seg
+                # Sjekker om avataren treffer blokken fra oversiden eller undersiden
+                
+                if self.vel_y < 0:# Hvis avataren har en negativ y-fart, betyr det at den hopper opp og treffer blokken fra undersiden
+                    # dy, avstanden avataren kan flytte seg før det blir en kollisjon, må være avstanden mellom avatarens hode og bunnen av blokken
+                    dy = tile[1].bottom - self.rect.top 
+                    self.vel_y = 0 # Endrer y-farten til 0 så avataren faller rett ned igjen, og ikke blir "hengende" i lufta
+              
+                elif self.vel_y >= 0:# Hvis avataren har en positiv y-fart, betyr det at den faller ned og treffer blokken fra oversiden
+                    # Her er dy avstanden mellom avatarens bein og toppen av blokken
+                    dy = tile[1].top - self.rect.bottom
         
         self.rect.x += dx
         self.rect.y += dy
@@ -97,6 +120,7 @@ class Player():
             dy = 0
         
         surface.blit(self.image, self.rect)
+        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)# Tegner rektangelet som utgjør omrisset rundt spillavataren, synliggjør kollisjonene
 
 class World():
     def __init__(self, data):
@@ -132,6 +156,7 @@ class World():
     def draw(self):
         for tile in self.tile_list:
             surface.blit(tile[0], tile[1])
+            pygame.draw.rect(screen, (255, 255, 255), tile[1]) # Tegner omrisset rundt alle blokkene, synliggjør kollisjoner
             
 
 world_data =[
