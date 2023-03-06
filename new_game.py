@@ -24,23 +24,29 @@ def draw_grid():
 class Player():
     def __init__(self, x, y):
         self.image_right = []
+        self.image_left = []
         self.index = 0
         self.counter = 0
         for i in range(1,3):
             img_right = pg.image.load(f'Zombie0{i}.png')
             img_right = pg.transform.scale(img_right(100,100))
+            img_left = pg.transform.flip(img_right, True, False)
             self.images_right.append(img_right)
+            self.images_left.append(img_left)
+        
         self.image = self.image_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
         self.vel_y = 0
         self.jumped = False
+        self.direction = 0                                      #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
 
     def update(self):
         #delta x og delta y
         dx = 0
         dy = 0
+        walk_cooldown = 20 # Må skje 20 ganger før animasjonen endres(?) ca. 10 min inn i del 3 av tutorialen
         
         key = pg.key.get_pressed()
         if key[pg.K_SPACE] and self.jumped == False:
@@ -50,10 +56,33 @@ class Player():
             self.jumped = False
         if key[pg.K_LEFT]:
             dx -= 5
+            self.counter += 1
+            self.direction = -1                                 #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
         if key[pg.K_RIGHT]:
             dx += 5
+            self.counter += 1
+            self.direction = 1                                  #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+        #Gjør at det er bildet hvor avataren står stille som vises, dersom han står stille   
+        if key[pg.K_LEFT] == False and key[pg.K_RIGHT] == False:
+            self.counter = 0
+            self.index = 0
+            if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                self.image = self.images_right[self.index]
+            if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                self.image = self.images_left[self.index]
         
-        #legger til gravitet
+        #Animasjon
+        if self.counter > walk_cooldown:
+            self.counter = 0
+            self.index += 1
+                if self.index >= len(self.images_right):
+            self.index = 0
+            if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                self.image = self.images_right[self.index]
+            if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                self.image = self.images_left[self.index]
+        
+        #legger til gravitasjon
         self.vel_y += 1
         if self.vel_y > 10:
             self.vel_y = 10
