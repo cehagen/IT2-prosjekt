@@ -119,7 +119,7 @@ class Player():
 
             # Sjekker for kollisjon mellom spilleren (self) og hver av lava-blokkene (som alle ligger i lava-group)
             if pg.sprite.spritecollide(self, lava_group, False):
-                game_over += 1
+                game_over -= 1
                 # print(game_over) Brukte denne i starten for å se koden fungerte, og kollisjonene ble registrert
 
             self.rect.x += dx
@@ -184,17 +184,21 @@ class World():
 class Lava(pg.sprite.Sprite):
     def __init__(self,x,y):
         pg.sprite.Sprite.__init__(self) #legger til objekter i spill
-        img = pg.image.load('Lava.png') #Hentet fra https://opengameart.org/content/2-seamless-lava-tiles
+        img = pg.image.load('Lava.png') #Hentet fra https://opengameart.org/content/2-seamless-lava-tiles 
         self.image = pg.transform.scale(img, (tile_size, tile_size//2))
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y 
 
+# 0 = tom
+# 1 = dirt-kloss
+# 2 = dirt-kloss med gress
+# 3 = lava
 world_data =[
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0],
 [0, 2, 2, 2, 2, 3, 3, 3, 3, 2, 1, 1, 2, 2],
 [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
