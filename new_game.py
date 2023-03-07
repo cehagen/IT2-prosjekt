@@ -29,26 +29,26 @@ class Player():
         self.counter = 0
         for i in range(1,3):
             img_right = pg.image.load(f'Zombie0{i}.png')
-            img_right = pg.transform.scale(img_right(100,100))
+            img_right = pg.transform.scale(img_right, (100,100))
             img_left = pg.transform.flip(img_right, True, False)
-            self.images_right.append(img_right)
-            self.images_left.append(img_left)
+            self.image_right.append(img_right)
+            self.image_left.append(img_left)
         
         self.image = self.image_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.width = self.image.get.width()
-        self.height = self.image.get.height()
+        self.width = self.image.get_width() 
+        self.height = self.image.get_height()
         self.vel_y = 0
         self.jumped = False
         self.direction = 0                                      #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
 
     def update(self):
-        #delta x og delta y
+        #delta x og delta yx
         dx = 0
         dy = 0
-        walk_cooldown = 20 # Må skje 20 ganger før animasjonen endres(?) ca. 10 min inn i del 3 av tutorialen
+        walk_cooldown = 10 # Bestemmer hvor fort bildene skifter
         
         key = pg.key.get_pressed()
         if key[pg.K_SPACE] and self.jumped == False:
@@ -69,20 +69,20 @@ class Player():
             self.counter = 0
             self.index = 0
             if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.images_right[self.index]
+                self.image = self.image_right[self.index]
             if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.images_left[self.index]
+                self.image = self.image_left[self.index]
         
         #Animasjon
         if self.counter > walk_cooldown:
             self.counter = 0
             self.index += 1
-                if self.index >= len(self.images_right):
-            self.index = 0
+            if self.index >= len(self.image_right):
+                self.index = 0
             if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.images_right[self.index]
+                self.image = self.image_right[self.index]
             if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.images_left[self.index]
+                self.image = self.image_left[self.index]
         
         #legger til gravitasjonskraft
         self.vel_y += 1
@@ -95,12 +95,12 @@ class Player():
             
             # Man må sjekke for kollisjon i x- og i y-retning hver for seg for å få ønskelig resultat
             # Sjekker for kollisjon i x-retningen
-            if tile[1].colliderect(self.rext.x + dx, self.rect.y, self.width, self.height): # dx er x-avstanden avataren skal flytte seg
+            if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height): # dx er x-avstanden avataren skal flytte seg
                 dx = 0 # Dersom avataren kolliderer med en blokk i x-retning, blir farten lik 0, så man ikke kan gå gjennom blokken
             
             #Sjekker for kollisjon i y-retningen
             # Bruker colliderect()-funksjonen fordi alle objektene er rektangler
-            if tile[1].colliderect(self.rext.x, self.rect.y + dy, self.width, self.height): # dy er y-avstanden avataren skal flytte seg
+            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height): # dy er y-avstanden avataren skal flytte seg
                 # Sjekker om avataren treffer blokken fra oversiden eller undersiden
                 
                 if self.vel_y < 0:# Hvis avataren har en negativ y-fart, betyr det at den hopper opp og treffer blokken fra undersiden
@@ -120,7 +120,7 @@ class Player():
             dy = 0
         
         surface.blit(self.image, self.rect)
-        pygame.draw.rect(screen, (255, 255, 255), self.rect, 2)# Tegner rektangelet som utgjør omrisset rundt spillavataren, synliggjør kollisjonene
+        pg.draw.rect(surface, (255, 255, 255), self.rect, 2)# Tegner rektangelet som utgjør omrisset rundt spillavataren, synliggjør kollisjonene
 
 class World():
     def __init__(self, data):
@@ -149,28 +149,40 @@ class World():
                     img_rect.y = row_count*tile_size
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
-                
+                if tile == 3:
+                    lava = Lava(col_count * tile_size, row_count * tile_size + (tile_size//2)) #pluss for at den skal ligge på bunnen
+                    lava_group.add(lava)
                 col_count += 1
             row_count += 1
             
     def draw(self):
         for tile in self.tile_list:
             surface.blit(tile[0], tile[1])
-            pygame.draw.rect(screen, (255, 255, 255), tile[1]) # Tegner omrisset rundt alle blokkene, synliggjør kollisjoner
+            pg.draw.rect(surface, (255, 255, 255), tile[1], 2) # Tegner omrisset rundt alle blokkene, synliggjør kollisjoner
             
+    
+class Lava(pg.sprite.Sprite):
+    def __init__(self,x,y):
+        pg.sprite.Sprite.__init__(self) #legger til objekter i spill
+        img = pg.image.load('Lava.png') #Hentet fra https://opengameart.org/content/2-seamless-lava-tiles
+        self.image = pg.transform.scale(img, (tile_size, tile_size//2))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y 
 
 world_data =[
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0],
+[0, 2, 2, 2, 2, 3, 3, 3, 3, 2, 1, 1, 2, 2],
+[2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
 player = Player(100, HEIGHT - 300)
+lava_group = pg.sprite.Group()
 world = World(world_data)
 
 
@@ -182,6 +194,9 @@ while run == True:
     surface.blit(bb, (0, 0))
     
     world.draw()
+    
+    lava_group.draw(surface)
+    
     player.update()
     draw_grid()
     
@@ -194,4 +209,3 @@ while run == True:
     pg.display.update()
             
 pg.quit()
-
