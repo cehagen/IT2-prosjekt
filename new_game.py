@@ -13,6 +13,7 @@ surface = pg.display.set_mode(SIZE)
 FPS = 60
 clock = pg.time.Clock()
 tile_size = 100
+game_over = 0 # Lager en funksjon som gjør det mulig at avataren dør
 
 bb = pg.image.load('bakgrunn.png')
 
@@ -34,6 +35,7 @@ class Player():
             self.image_right.append(img_right)
             self.image_left.append(img_left)
         
+        self.dead_image = pg.image.load('Dead_Zombie01.png') # Fant dette bildet på https://opengameart.org/content/zombie-character
         self.image = self.image_right[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -44,84 +46,102 @@ class Player():
         self.jumped = False
         self.direction = 0                                      #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
 
-    def update(self):
+    def update(self, game_over): # Legger inn game_over som et argument i update-funksjonen, siden det er en global variabel
         #delta x og delta yx
         dx = 0
         dy = 0
         walk_cooldown = 10 # Bestemmer hvor fort bildene skifter
         
-        key = pg.key.get_pressed()
-        if key[pg.K_SPACE] and self.jumped == False:
-            self.vel_y  = -15
-            self.jumped = True
-        if key[pg.K_SPACE] == False:
-            self.jumped = False
-        if key[pg.K_LEFT]:
-            dx -= 5
-            self.counter += 1
-            self.direction = -1                                 #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-        if key[pg.K_RIGHT]:
-            dx += 5
-            self.counter += 1
-            self.direction = 1                                  #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-        #Gjør at det er bildet hvor avataren står stille som vises, dersom han står stille   
-        if key[pg.K_LEFT] == False and key[pg.K_RIGHT] == False:
-            self.counter = 0
-            self.index = 0
-            if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.image_right[self.index]
-            if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.image_left[self.index]
-        
-        #Animasjon
-        if self.counter > walk_cooldown:
-            self.counter = 0
-            self.index += 1
-            if self.index >= len(self.image_right):
+        if game_over == 0:
+            # Legger inn bevegelse for tastene
+            key = pg.key.get_pressed()
+            if key[pg.K_SPACE] and self.jumped == False:
+                self.vel_y  = -15
+                self.jumped = True
+            if key[pg.K_SPACE] == False:
+                self.jumped = False
+            if key[pg.K_LEFT]:
+                dx -= 5
+                self.counter += 1
+                self.direction = -1                                 #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+            if key[pg.K_RIGHT]:
+                dx += 5
+                self.counter += 1
+                self.direction = 1                                  #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+            #Gjør at det er bildet hvor avataren står stille som vises, dersom han står stille   
+            if key[pg.K_LEFT] == False and key[pg.K_RIGHT] == False:
+                self.counter = 0
                 self.index = 0
-            if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.image_right[self.index]
-            if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-                self.image = self.image_left[self.index]
-        
-        #legger til gravitasjonskraft
-        self.vel_y += 1
-        if self.vel_y > 10:
-            self.vel_y = 10
-        dy += self.vel_y
-        
-        #Sjekker for kollisjoner mellom avataren og blokkene
-        for tile in world.tile_list:
+                if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                    self.image = self.image_right[self.index]
+                if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                    self.image = self.image_left[self.index]
+
+            #Animasjon
+            if self.counter > walk_cooldown:
+                self.counter = 0
+                self.index += 1
+                if self.index >= len(self.image_right):
+                    self.index = 0
+                if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                    self.image = self.image_right[self.index]
+                if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                    self.image = self.image_left[self.index]
+
+            #legger til gravitasjonskraft
+            self.vel_y += 1
+            if self.vel_y > 10:
+                self.vel_y = 10
+            dy += self.vel_y
+
+            #Sjekker for kollisjoner mellom avataren og blokkene
+            for tile in world.tile_list:
+
+                # Man må sjekke for kollisjon i x- og i y-retning hver for seg for å få ønskelig resultat
+                # Sjekker for kollisjon i x-retningen
+                if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height): # dx er x-avstanden avataren skal flytte seg
+                    dx = 0 # Dersom avataren kolliderer med en blokk i x-retning, blir farten lik 0, så man ikke kan gå gjennom blokken
+
+                #Sjekker for kollisjon i y-retningen
+                # Bruker colliderect()-funksjonen fordi alle objektene er rektangler
+                if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height): # dy er y-avstanden avataren skal flytte seg
+                    # Sjekker om avataren treffer blokken fra oversiden eller undersiden
+
+                    if self.vel_y < 0:# Hvis avataren har en negativ y-fart, betyr det at den hopper opp og treffer blokken fra undersiden
+                        # dy, avstanden avataren kan flytte seg før det blir en kollisjon, må være avstanden mellom avatarens hode og bunnen av blokken
+                        dy = tile[1].bottom - self.rect.top 
+                        self.vel_y = 0 # Endrer y-farten til 0 så avataren faller rett ned igjen, og ikke blir "hengende" i lufta
+
+                    elif self.vel_y >= 0:# Hvis avataren har en positiv y-fart, betyr det at den faller ned og treffer blokken fra oversiden
+                        # Her er dy avstanden mellom avatarens bein og toppen av blokken
+                        dy = tile[1].top - self.rect.bottom
+
+
+            # Sjekker for kollisjon mellom spilleren (self) og hver av lava-blokkene (som alle ligger i lava-group)
+            if pg.sprite.spritecollide(self, lava_group, False):
+                game_over += 1
+                # print(game_over) Brukte denne i starten for å se koden fungerte, og kollisjonene ble registrert
+
+            self.rect.x += dx
+            self.rect.y += dy
             
-            # Man må sjekke for kollisjon i x- og i y-retning hver for seg for å få ønskelig resultat
-            # Sjekker for kollisjon i x-retningen
-            if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height): # dx er x-avstanden avataren skal flytte seg
-                dx = 0 # Dersom avataren kolliderer med en blokk i x-retning, blir farten lik 0, så man ikke kan gå gjennom blokken
+        elif game_over == -1: # Hvis game_over = -1, betyr det at man har dødd
+            self.image = self.dead_image # I såfall er det et annet bilde av avataren som vises
+            if self.rect.y > 10:                         # Kan hende vi må bytte tallet 10, men må sjekke hvordan det ser ut når vi runner
+                self.rect.y -= 5 # Avataren "flyter" opp til toppen av skjermen
+
+# Kanskje det skal skje noe annet med ham når han dør?
+# I videoen blir avataren et spøkelse, så da passer det jo fint at han "flyter" til toppen
             
-            #Sjekker for kollisjon i y-retningen
-            # Bruker colliderect()-funksjonen fordi alle objektene er rektangler
-            if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height): # dy er y-avstanden avataren skal flytte seg
-                # Sjekker om avataren treffer blokken fra oversiden eller undersiden
-                
-                if self.vel_y < 0:# Hvis avataren har en negativ y-fart, betyr det at den hopper opp og treffer blokken fra undersiden
-                    # dy, avstanden avataren kan flytte seg før det blir en kollisjon, må være avstanden mellom avatarens hode og bunnen av blokken
-                    dy = tile[1].bottom - self.rect.top 
-                    self.vel_y = 0 # Endrer y-farten til 0 så avataren faller rett ned igjen, og ikke blir "hengende" i lufta
-              
-                elif self.vel_y >= 0:# Hvis avataren har en positiv y-fart, betyr det at den faller ned og treffer blokken fra oversiden
-                    # Her er dy avstanden mellom avatarens bein og toppen av blokken
-                    dy = tile[1].top - self.rect.bottom
-        
-        self.rect.x += dx
-        self.rect.y += dy
-        
-        if self.rect.bottom > HEIGHT:
-            self.rect.bottom = HEIGHT
-            dy = 0
+            """if self.rect.bottom > HEIGHT:
+                self.rect.bottom = HEIGHT
+                dy = 0""" # Brukte denne i starten, så ikke avataren skulle falle ned gjennom bunnen av skjermen 
         
         surface.blit(self.image, self.rect)
         pg.draw.rect(surface, (255, 255, 255), self.rect, 2)# Tegner rektangelet som utgjør omrisset rundt spillavataren, synliggjør kollisjonene
-
+        
+        return game_over # Returnerer en evt. ny verdi for game_over-variablen, som hvis avataren treffer lavaen
+        
 class World():
     def __init__(self, data):
         
@@ -195,9 +215,12 @@ while run == True:
     
     world.draw()
     
+    # if game_over == 0:                                    # Trenger foreløpig ikke denne delen
+        # blob_group.update()                               # Dette vil gjøre at blobbene slutter å bevege seg når avataren treffer lavaen
+    
     lava_group.draw(surface)
     
-    player.update()
+    game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
     draw_grid()
     
     
