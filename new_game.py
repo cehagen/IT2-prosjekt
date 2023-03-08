@@ -16,35 +16,48 @@ tile_size = 100
 game_over = 0 # Lager en funksjon som gjør det mulig at avataren dør
 
 bb = pg.image.load('bakgrunn.png')
+restart_img = pg.image.load('restart.png')
 
 def draw_grid():
     for line in range (0, 14):
         pg.draw.line(surface, (225, 255, 255), (0, line * tile_size), (WIDTH, line * tile_size))
         pg.draw.line(surface, (225, 255, 255), (line * tile_size, 0), (line * tile_size, HEIGHT))
 
-class Player():
-    def __init__(self, x, y):
-        self.image_right = []
-        self.image_left = []
-        self.index = 0
-        self.counter = 0
-        for i in range(1,3):
-            img_right = pg.image.load(f'Zombie0{i}.png')
-            img_right = pg.transform.scale(img_right, (100,100))
-            img_left = pg.transform.flip(img_right, True, False)
-            self.image_right.append(img_right)
-            self.image_left.append(img_left)
-        
-        self.dead_image = pg.image.load('Dead_Zombie01.png') # Fant dette bildet på https://opengameart.org/content/zombie-character
-        self.image = self.image_right[self.index]
+
+class Button():
+    def __init__(self, x, y, image):
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.width = self.image.get_width() 
-        self.height = self.image.get_height()
-        self.vel_y = 0
-        self.jumped = False
-        self.direction = 0                                      #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+        self.clicked = False
+        
+    def draw(self):
+        action = False
+        
+        #tegner knappen - han tegnet den lengre nede men vte ikke omd et har noe å si for framtiden
+        surface.blit(self.image, self.rect)
+        
+        #henter musen sin posisjon
+        pos = pg.mouse.get_pos()
+        
+        #sjekker om musen er over og trykker
+        if self.rect.collidepoint(pos):
+            #Det er null siden venstre må trykkes på tror jeg, forklares ved 8.20
+            if pg.mouse.get_pressed()[0] == 1 and self.clicked == False:
+                action = True
+                self.clicked = True
+        #null betyr at den er sluppet ut igjen
+        if pg.mouse.get_pressed()[0] == 0:
+            self.clicked = False
+        
+        return action
+                
+        
+    
+class Player():
+    def __init__(self, x, y):
+        self.reset(x, y)                                    #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
 
     def update(self, game_over): # Legger inn game_over som et argument i update-funksjonen, siden det er en global variabel
         #delta x og delta yx
@@ -55,7 +68,7 @@ class Player():
         if game_over == 0:
             # Legger inn bevegelse for tastene
             key = pg.key.get_pressed()
-            if key[pg.K_SPACE] and self.jumped == False:
+            if key[pg.K_SPACE] and self.jumped == False and self.in_air == False:
                 self.vel_y  = -15
                 self.jumped = True
             if key[pg.K_SPACE] == False:
@@ -89,11 +102,12 @@ class Player():
                     self.image = self.image_left[self.index]
 
             #legger til gravitasjonskraft
-            self.vel_y += 1
+            self.vel_y += 0.75
             if self.vel_y > 10:
                 self.vel_y = 10
             dy += self.vel_y
-
+            
+            self.in_air = True 
             #Sjekker for kollisjoner mellom avataren og blokkene
             for tile in world.tile_list:
 
@@ -115,6 +129,7 @@ class Player():
                     elif self.vel_y >= 0:# Hvis avataren har en positiv y-fart, betyr det at den faller ned og treffer blokken fra oversiden
                         # Her er dy avstanden mellom avatarens bein og toppen av blokken
                         dy = tile[1].top - self.rect.bottom
+                        self.in_air = False
 
 
             # Sjekker for kollisjon mellom spilleren (self) og hver av lava-blokkene (som alle ligger i lava-group)
@@ -141,6 +156,30 @@ class Player():
         pg.draw.rect(surface, (255, 255, 255), self.rect, 2)# Tegner rektangelet som utgjør omrisset rundt spillavataren, synliggjør kollisjonene
         
         return game_over # Returnerer en evt. ny verdi for game_over-variablen, som hvis avataren treffer lavaen
+        
+    def reset(self, x, y):
+        self.image_right = []
+        self.image_left = []
+        self.index = 0
+        self.counter = 0
+        for i in range(1,3):
+            img_right = pg.image.load(f'Zombie0{i}.png')
+            img_right = pg.transform.scale(img_right, (100,100))
+            img_left = pg.transform.flip(img_right, True, False)
+            self.image_right.append(img_right)
+            self.image_left.append(img_left)
+        
+        self.dead_image = pg.image.load('Dead_Zombie01.png') # Fant dette bildet på https://opengameart.org/content/zombie-character
+        self.image = self.image_right[self.index]
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+        self.width = self.image.get_width() 
+        self.height = self.image.get_height()
+        self.vel_y = 0
+        self.jumped = False
+        self.direction = 0
+        self.in_air = True #kan ikke hoppe flere ganger på rad
         
 class World():
     def __init__(self, data):
@@ -198,16 +237,20 @@ world_data =[
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 2, 2, 2, 2, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0],
-[0, 2, 2, 2, 2, 3, 3, 3, 3, 2, 1, 1, 2, 2],
+[0, 2, 2, 2, 3, 3, 2, 3, 3, 2, 1, 1, 2, 2],
 [2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ]
 
 player = Player(100, HEIGHT - 300)
 lava_group = pg.sprite.Group()
+
 world = World(world_data)
+
+#lager knappen
+restart_button = Button(WIDTH //2 - 250, HEIGHT //2 , restart_img)
 
 
 run = True
@@ -219,10 +262,19 @@ while run == True:
     
     world.draw()
     
-    # if game_over == 0:                                    # Trenger foreløpig ikke denne delen
-        # blob_group.update()                               # Dette vil gjøre at blobbene slutter å bevege seg når avataren treffer lavaen
-    
     lava_group.draw(surface)
+    
+    #if game_over == 0:                                    # Trenger foreløpig ikke denne delen
+        #blob_group.update()                               # Dette vil gjøre at blobbene slutter å bevege seg når avataren treffer lavaen
+    
+    gamer_over = player.update(game_over)
+    
+    #hvis spiller dør
+    if game_over == -1:
+        if restart_button.draw():
+            player.reset(100, HEIGHT - 300)
+            game_over = 0
+    
     
     game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
     draw_grid()
