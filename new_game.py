@@ -35,19 +35,19 @@ class Button():
     def draw(self):
         action = False
         
-        #tegner knappen - han tegnet den lengre nede men vte ikke omd et har noe å si for framtiden
+        # Tegner knappen - han tegnet den lengre nede men vet ikke om det har noe å si for framtiden
         surface.blit(self.image, self.rect)
         
-        #henter musen sin posisjon
+        # Henter musen sin posisjon
         pos = pg.mouse.get_pos()
         
-        #sjekker om musen er over og trykker
+        # Sjekker om musen er over og trykker
         if self.rect.collidepoint(pos):
-            #Det er null siden venstre må trykkes på tror jeg, forklares ved 8.20
+            # Det er null siden venstre må trykkes på tror jeg, forklares ved 8.20
             if pg.mouse.get_pressed()[0] == 1 and self.clicked == False:
                 action = True
                 self.clicked = True
-        #null betyr at den er sluppet ut igjen
+        # Null betyr at tasten er sluppet igjen
         if pg.mouse.get_pressed()[0] == 0:
             self.clicked = False
         
@@ -57,7 +57,7 @@ class Button():
     
 class Player():
     def __init__(self, x, y):
-        self.reset(x, y)                                    #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+        self.reset(x, y)                                    # Vi kan også bruke andre navn på variabelen, så blir det større forskjell
 
     def update(self, game_over): # Legger inn game_over som et argument i update-funksjonen, siden det er en global variabel
         #delta x og delta yx
@@ -76,39 +76,39 @@ class Player():
             if key[pg.K_LEFT]:
                 dx -= 5
                 self.counter += 1
-                self.direction = -1                                 #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                self.direction = -1                                 # Vi kan også bruke andre navn på variabelen, så blir det større forskjell
             if key[pg.K_RIGHT]:
                 dx += 5
                 self.counter += 1
-                self.direction = 1                                  #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
-            #Gjør at det er bildet hvor avataren står stille som vises, dersom han står stille   
+                self.direction = 1                                  # Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+            # Gjør at det er bildet hvor avataren står stille som vises, dersom han står stille   
             if key[pg.K_LEFT] == False and key[pg.K_RIGHT] == False:
                 self.counter = 0
                 self.index = 0
-                if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                if self.direction == 1:                             # Vi kan også bruke andre navn på variabelen, så blir det større forskjell
                     self.image = self.image_right[self.index]
-                if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                if self.direction == -1:                            # Vi kan også bruke andre navn på variabelen, så blir det større forskjell
                     self.image = self.image_left[self.index]
 
-            #Animasjon
+            # Animasjon
             if self.counter > walk_cooldown:
                 self.counter = 0
                 self.index += 1
                 if self.index >= len(self.image_right):
                     self.index = 0
-                if self.direction == 1:                             #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                if self.direction == 1:                             # Vi kan også bruke andre navn på variabelen, så blir det større forskjell
                     self.image = self.image_right[self.index]
-                if self.direction == -1:                            #Vi kan også bruke andre navn på variabelen, så blir det større forskjell
+                if self.direction == -1:                            # Vi kan også bruke andre navn på variabelen, så blir det større forskjell
                     self.image = self.image_left[self.index]
 
-            #legger til gravitasjonskraft
+            # Legger til gravitasjonskraft
             self.vel_y += 0.75
             if self.vel_y > 10:
                 self.vel_y = 10
             dy += self.vel_y
             
             self.in_air = True 
-            #Sjekker for kollisjoner mellom avataren og blokkene
+            # Sjekker for kollisjoner mellom avataren og blokkene
             for tile in world.tile_list:
 
                 # Man må sjekke for kollisjon i x- og i y-retning hver for seg for å få ønskelig resultat
@@ -116,7 +116,7 @@ class Player():
                 if tile[1].colliderect(self.rect.x + dx, self.rect.y, self.width, self.height): # dx er x-avstanden avataren skal flytte seg
                     dx = 0 # Dersom avataren kolliderer med en blokk i x-retning, blir farten lik 0, så man ikke kan gå gjennom blokken
 
-                #Sjekker for kollisjon i y-retningen
+                # Sjekker for kollisjon i y-retningen
                 # Bruker colliderect()-funksjonen fordi alle objektene er rektangler
                 if tile[1].colliderect(self.rect.x, self.rect.y + dy, self.width, self.height): # dy er y-avstanden avataren skal flytte seg
                     # Sjekker om avataren treffer blokken fra oversiden eller undersiden
@@ -179,7 +179,7 @@ class Player():
         self.vel_y = 0
         self.jumped = False
         self.direction = 0
-        self.in_air = True #kan ikke hoppe flere ganger på rad
+        self.in_air = True # Kan ikke hoppe flere ganger på rad
         
 class World():
     def __init__(self, data):
@@ -209,7 +209,7 @@ class World():
                     tile = (img, img_rect)
                     self.tile_list.append(tile)
                 if tile == 3:
-                    lava = Lava(col_count * tile_size, row_count * tile_size + (tile_size//2)) #pluss for at den skal ligge på bunnen
+                    lava = Lava(col_count * tile_size, row_count * tile_size + (tile_size//2)) # Pluss for at den skal ligge på bunnen
                     lava_group.add(lava)
                 col_count += 1
             row_count += 1
@@ -222,8 +222,8 @@ class World():
     
 class Lava(pg.sprite.Sprite):
     def __init__(self,x,y):
-        pg.sprite.Sprite.__init__(self) #legger til objekter i spill
-        img = pg.image.load('Lava.png') #Hentet fra https://opengameart.org/content/2-seamless-lava-tiles 
+        pg.sprite.Sprite.__init__(self) # Legger til objekter i spill
+        img = pg.image.load('Lava.png') # Hentet fra https://opengameart.org/content/2-seamless-lava-tiles 
         self.image = pg.transform.scale(img, (tile_size, tile_size//2))
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -249,7 +249,7 @@ lava_group = pg.sprite.Group()
 
 world = World(world_data)
 
-#lager knappen
+# Lager knappen
 restart_button = Button(WIDTH //2 - 250, HEIGHT //2 , restart_img)
 
 
@@ -269,7 +269,7 @@ while run == True:
     
     gamer_over = player.update(game_over)
     
-    #hvis spiller dør
+    # Hvis avataren dør
     if game_over == -1:
         if restart_button.draw():
             player.reset(100, HEIGHT - 300)
@@ -288,3 +288,4 @@ while run == True:
     pg.display.update()
             
 pg.quit()
+
