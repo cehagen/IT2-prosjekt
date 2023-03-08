@@ -14,9 +14,12 @@ FPS = 60
 clock = pg.time.Clock()
 tile_size = 100
 game_over = 0 # Lager en funksjon som gjør det mulig at avataren dør
+start_menu = True # Definerer start_menu som True, slik at vi får opp startmenyen når man runner koden
 
-bb = pg.image.load('bakgrunn.png')
-restart_img = pg.image.load('restart.png')
+bb = pg.image.load('background.png')
+restart_img = pg.image.load('restart.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
+start_img = pg.image.load('start.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
+exit_img = pg.image.load('exit.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 
 def draw_grid():
     for line in range (0, 14):
@@ -249,9 +252,10 @@ lava_group = pg.sprite.Group()
 
 world = World(world_data)
 
-# Lager knappen
-restart_button = Button(WIDTH //2 - 250, HEIGHT //2 , restart_img)
-
+# Lager knappene
+restart_button = Button(WIDTH //2 - 250, HEIGHT // 4 , restart_img)
+start_button = Button(WIDTH //2 - 550, HEIGHT // 4, start_img)
+exit_button = Button(WIDTH //2 , HEIGHT // 4, exit_img)
 
 run = True
 while run == True:
@@ -260,24 +264,31 @@ while run == True:
     
     surface.blit(bb, (0, 0))
     
-    world.draw()
+    if start_menu == True:
+        if exit_button.draw() == True:
+            run = False
+        if start_button.draw() == True:
+            start_menu = False
     
-    lava_group.draw(surface)
-    
-    #if game_over == 0:                                    # Trenger foreløpig ikke denne delen
-        #blob_group.update()                               # Dette vil gjøre at blobbene slutter å bevege seg når avataren treffer lavaen
-    
-    gamer_over = player.update(game_over)
-    
-    # Hvis avataren dør
-    if game_over == -1:
-        if restart_button.draw():
-            player.reset(100, HEIGHT - 300)
-            game_over = 0
-    
-    
-    game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
-    draw_grid()
+    else: 
+        world.draw()
+        
+        lava_group.draw(surface)
+        
+        #if game_over == 0:                                    # Trenger foreløpig ikke denne delen
+            #blob_group.update()                               # Dette vil gjøre at blobbene slutter å bevege seg når avataren treffer lavaen
+        
+        gamer_over = player.update(game_over)
+        
+        # Hvis avataren dør
+        if game_over == -1:
+            if restart_button.draw():
+                player.reset(100, HEIGHT - 300)
+                game_over = 0
+        
+        
+        game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
+        draw_grid()
     
     
     #print(world.tile_list)
