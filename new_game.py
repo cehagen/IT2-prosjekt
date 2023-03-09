@@ -5,14 +5,14 @@ pg.init()
 
 global WIDTH, HEIGHT
 WIDTH = 1400
-HEIGHT = 800
+HEIGHT = 700
 SIZE = (WIDTH, HEIGHT)
 surface = pg.display.set_mode(SIZE)
 
 
 FPS = 60
 clock = pg.time.Clock()
-tile_size = 100
+tile_size = 70
 game_over = 0 # Lager en funksjon som gjør det mulig at avataren dør
 start_menu = True # Definerer start_menu som True, slik at vi får opp startmenyen når man runner koden
 
@@ -22,7 +22,7 @@ start_img = pg.image.load('start.png') # Hentet fra https://opengameart.org/cont
 exit_img = pg.image.load('exit.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 
 def draw_grid():
-    for line in range (0, 14):
+    for line in range (0, 20): # Definerer antallet kolonner med blokker vi vil dele skjermen inn i
         pg.draw.line(surface, (225, 255, 255), (0, line * tile_size), (WIDTH, line * tile_size))
         pg.draw.line(surface, (225, 255, 255), (line * tile_size, 0), (line * tile_size, HEIGHT))
 
@@ -145,7 +145,7 @@ class Player():
             
         elif game_over == -1: # Hvis game_over = -1, betyr det at man har dødd
             self.image = self.dead_image # I såfall er det et annet bilde av avataren som vises
-            if self.rect.y > 10:                         # Kan hende vi må bytte tallet 10, men må sjekke hvordan det ser ut når vi runner
+            if self.rect.y > 5:                         # Kan hende vi må bytte tallet 10, men må sjekke hvordan det ser ut når vi runner
                 self.rect.y -= 5 # Avataren "flyter" opp til toppen av skjermen
 
 # Kanskje det skal skje noe annet med ham når han dør?
@@ -237,14 +237,16 @@ class Lava(pg.sprite.Sprite):
 # 2 = dirt-kloss med gress
 # 3 = lava
 world_data =[
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0],
-[0, 2, 2, 2, 3, 3, 2, 3, 3, 2, 1, 1, 2, 2],
-[2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 3, 3, 2, 0, 0, 0, 2, 2],
+[2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
 ]
 
 player = Player(100, HEIGHT - 300)
@@ -282,9 +284,11 @@ while run == True:
         
         # Hvis avataren dør
         if game_over == -1:
-            if restart_button.draw():
+            if exit_button.draw() == True: # Tegner exit-knappen for å kunne avslutte spillet
+                run = False # Hvis knappen trykkes på, endres run-variablen til False, og spillet avsluttes
+            if restart_button.draw() == True: # Tegner reset-knappen så man kan starte spillet på nytt
                 player.reset(100, HEIGHT - 300)
-                game_over = 0
+                game_over = 0 # Endrer game_over-variablen til 0 igjen, så spillet kjøres fra begynnelsen
         
         
         game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
@@ -299,4 +303,3 @@ while run == True:
     pg.display.update()
             
 pg.quit()
-
