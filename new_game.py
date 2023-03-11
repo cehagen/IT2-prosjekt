@@ -1,5 +1,6 @@
 import pygame as pg
 from pygame.locals import *
+import pickle
 
 pg.init() 
 
@@ -20,6 +21,7 @@ bb = pg.image.load('background.png')
 restart_img = pg.image.load('restart.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 start_img = pg.image.load('start.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 exit_img = pg.image.load('exit.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
+level = 1
 
 def draw_grid():
     for line in range (0, 20): # Definerer antallet kolonner med blokker vi vil dele skjermen inn i
@@ -143,6 +145,9 @@ class Player():
             self.rect.x += dx
             self.rect.y += dy
             
+            if pg.sprite.spritecollide(self, exit_group, False):
+                game_over = 1
+            
         elif game_over == -1: # Hvis game_over = -1, betyr det at man har dødd
             self.image = self.dead_image # I såfall er det et annet bilde av avataren som vises
             if self.rect.y > -800:                         # Kan hende vi må bytte tallet 10, men må sjekke hvordan det ser ut når vi runner
@@ -214,6 +219,9 @@ class World():
                 if tile == 3:
                     lava = Lava(col_count * tile_size, row_count * tile_size + (tile_size//2)) # Pluss for at den skal ligge på bunnen
                     lava_group.add(lava)
+                if tile == 4:
+                    exit = Exit(col_count * tile_size, row_count * tile_size - (tile_size))
+                    exit_group.add(exit)
                 col_count += 1
             row_count += 1
             
@@ -230,12 +238,22 @@ class Lava(pg.sprite.Sprite):
         self.image = pg.transform.scale(img, (tile_size, tile_size//2))
         self.rect = self.image.get_rect()
         self.rect.x = x
-        self.rect.y = y 
+        self.rect.y = y
+
+class Exit(pg.sprite.Sprite):
+    def __init__(self,x,y):
+        pg.sprite.Sprite.__init__(self) # Legger til objekter i spill
+        img = pg.image.load('next.png') # Hentet fra https://opengameart.org/content/2-seamless-lava-tiles 
+        self.image = pg.transform.scale(img, (tile_size + tile_size//2, int(tile_size * 2)))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
 # 0 = tom
 # 1 = dirt-kloss
 # 2 = dirt-kloss med gress
 # 3 = lava
+# 4 = dør
 world_data =[
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -244,14 +262,20 @@ world_data =[
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0],
 [2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 3, 3, 2, 0, 0, 0, 2, 2],
 [2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
 ]
 
+
 player = Player(100, HEIGHT - 300)
 lava_group = pg.sprite.Group()
+exit_group = pg.sprite.Group()
 
+#Vi kan bruke dette4 senere når vi skal ha flere leveler
+#henter data fra mappen med leveler
+#pickle_in = open(f'level{level}_data', 'rb')
+#world_data = pickle.load(pickle_in)
 world = World(world_data)
 
 # Lager knappene
@@ -276,6 +300,7 @@ while run == True:
         world.draw()
         
         lava_group.draw(surface)
+        exit_group.draw(surface)
         
         #if game_over == 0:                                    # Trenger foreløpig ikke denne delen
             #blob_group.update()                               # Dette vil gjøre at blobbene slutter å bevege seg når avataren treffer lavaen
@@ -290,7 +315,16 @@ while run == True:
                 player.reset(100, HEIGHT - 300)
                 game_over = 0 # Endrer game_over-variablen til 0 igjen, så spillet kjøres fra begynnelsen
         
-        
+        #Hvis spiller har gjort ferdig ett level
+        if game_over == 1:
+            #level += 1
+            run = False
+        """
+            if level <= max_levels:
+                pass
+            else:
+                pass
+        """ 
         game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
         draw_grid()
     
