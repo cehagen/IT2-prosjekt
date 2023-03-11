@@ -145,7 +145,7 @@ class Player():
             
         elif game_over == -1: # Hvis game_over = -1, betyr det at man har dødd
             self.image = self.dead_image # I såfall er det et annet bilde av avataren som vises
-            if self.rect.y > 5:                         # Kan hende vi må bytte tallet 10, men må sjekke hvordan det ser ut når vi runner
+            if self.rect.y > -800:                         # Kan hende vi må bytte tallet 10, men må sjekke hvordan det ser ut når vi runner
                 self.rect.y -= 5 # Avataren "flyter" opp til toppen av skjermen
 
 # Kanskje det skal skje noe annet med ham når han dør?
@@ -255,9 +255,9 @@ lava_group = pg.sprite.Group()
 world = World(world_data)
 
 # Lager knappene
-restart_button = Button(WIDTH //2 - 250, HEIGHT // 4 , restart_img)
+restart_button = Button(WIDTH //2 - 200, HEIGHT // 4 , restart_img)
 start_button = Button(WIDTH //2 - 550, HEIGHT // 4, start_img)
-exit_button = Button(WIDTH //2 , HEIGHT // 4, exit_img)
+exit_button = Button(WIDTH //2 + 250, HEIGHT // 4, exit_img)
 
 run = True
 while run == True:
