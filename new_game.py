@@ -10,6 +10,7 @@ HEIGHT = 700
 SIZE = (WIDTH, HEIGHT)
 surface = pg.display.set_mode(SIZE)
 
+font_score = pg.font.SysFont('Bauhaus 93', 30)
 
 FPS = 60
 clock = pg.time.Clock()
@@ -21,7 +22,14 @@ bb = pg.image.load('background.png')
 restart_img = pg.image.load('restart.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 start_img = pg.image.load('start.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 exit_img = pg.image.load('exit.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
-level = 1
+#level = 1
+score = 0
+
+white = (255, 255, 255)
+
+def draw_text(text, font, col, x, y):
+    img = font.render(text, True, text_col)
+    surface.blit(img, (x,y))
 
 def draw_grid():
     for line in range (0, 20): # Definerer antallet kolonner med blokker vi vil dele skjermen inn i
@@ -142,6 +150,8 @@ class Player():
                 game_over -= 1
                 # print(game_over) Brukte denne i starten for å se koden fungerte, og kollisjonene ble registrert
 
+
+
             self.rect.x += dx
             self.rect.y += dy
             
@@ -222,6 +232,9 @@ class World():
                 if tile == 4:
                     exit = Exit(col_count * tile_size, row_count * tile_size - (tile_size))
                     exit_group.add(exit)
+                if tile == 5:
+                    coin = Coin(col_count * tile_size + (tile_size // 2), row_count * tile_size + (tile_size//2)) 
+                    coin_group.add(coin)
                 col_count += 1
             row_count += 1
             
@@ -239,6 +252,14 @@ class Lava(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
+        
+class Coin(pg.sprite.Sprite):
+    def __init__(self,x,y):
+        pg.sprite.Sprite.__init__(self) # Legger til objekter i spill
+        img = pg.image.load('coin.png') # Hentet fra https://opengameart.org/content/2-seamless-lava-tiles 
+        self.image = pg.transform.scale(img, (tile_size//2, tile_size//2))
+        self.rect = self.image.get_rect()
+        self.rect.center = (x,y) #gjør at vi posisjonerer fra midtpunktet av mynten
 
 class Exit(pg.sprite.Sprite):
     def __init__(self,x,y):
@@ -254,15 +275,16 @@ class Exit(pg.sprite.Sprite):
 # 2 = dirt-kloss med gress
 # 3 = lava
 # 4 = dør
+
 world_data =[
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0],
 [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0],
+[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 4, 0],
 [2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 3, 3, 2, 0, 0, 0, 2, 2],
 [2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
 ]
@@ -270,13 +292,14 @@ world_data =[
 
 player = Player(100, HEIGHT - 300)
 lava_group = pg.sprite.Group()
+coin_group = pg.sprite.Group()
 exit_group = pg.sprite.Group()
 
 #Vi kan bruke dette4 senere når vi skal ha flere leveler
 #henter data fra mappen med leveler
-#pickle_in = open(f'level{level}_data', 'rb')
+#pickle_in = open(caroline1_data, 'rb')
 #world_data = pickle.load(pickle_in)
-world = World(world_data)
+world = World(world_data) 
 
 # Lager knappene
 restart_button = Button(WIDTH //2 - 200, HEIGHT // 4 , restart_img)
@@ -300,10 +323,15 @@ while run == True:
         world.draw()
         
         lava_group.draw(surface)
+        coin_group.draw(surface)
         exit_group.draw(surface)
         
-        #if game_over == 0:                                    # Trenger foreløpig ikke denne delen
+        if game_over == 0:                                    # Trenger foreløpig ikke denne delen
             #blob_group.update()                               # Dette vil gjøre at blobbene slutter å bevege seg når avataren treffer lavaen
+            #sjekker om en mynt har blitt tatt
+            if pg.sprite.spritecollide(player, coin_group, True):
+                score += 1
+            draw_text('X ' + str(score), font_score, white, tile_size - 10, 10)
         
         gamer_over = player.update(game_over)
         
@@ -314,11 +342,13 @@ while run == True:
             if restart_button.draw() == True: # Tegner reset-knappen så man kan starte spillet på nytt
                 player.reset(100, HEIGHT - 300)
                 game_over = 0 # Endrer game_over-variablen til 0 igjen, så spillet kjøres fra begynnelsen
+                score = 0
         
         #Hvis spiller har gjort ferdig ett level
         if game_over == 1:
             #level += 1
             run = False
+            
         """
             if level <= max_levels:
                 pass
