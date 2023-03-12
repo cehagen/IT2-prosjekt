@@ -27,7 +27,7 @@ score = 0
 
 white = (255, 255, 255)
 
-def draw_text(text, font, col, x, y):
+def draw_text(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     surface.blit(img, (x,y))
 
@@ -331,7 +331,7 @@ while run == True:
             #sjekker om en mynt har blitt tatt
             if pg.sprite.spritecollide(player, coin_group, True):
                 score += 1
-            draw_text('X ' + str(score), font_score, white, tile_size - 10, 10)
+            draw_text('Poeng: ' + str(score), font_score, white, tile_size - 10, 10)
         
         gamer_over = player.update(game_over)
         
