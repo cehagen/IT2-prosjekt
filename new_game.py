@@ -16,7 +16,7 @@ font_score = pg.font.SysFont('Bauhaus 93', 30)
 
 FPS = 60
 clock = pg.time.Clock()
-tile_size = 70 # Deler inn skjermen i mange kvadrater, hver av sidene i kvadratene har lengde 70
+tile_size = 70 # Deler inn skjermen i mange kvadrater som hver har sidelengde 70
 game_over = 0 # Lager en funksjon som brukes når avataren dør
 start_menu = True # Definerer start_menu som True, slik at vi får opp startmenyen når man kjører koden
 
@@ -25,7 +25,7 @@ bb = pg.image.load('background.png')
 restart_img = pg.image.load('restart.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 start_img = pg.image.load('start.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
 exit_img = pg.image.load('exit.png') # Hentet fra https://opengameart.org/content/ultimate-timeracer-button-pack
-#level = 1
+level_count = 1
 score = 0
 white = (255, 255, 255)
 
@@ -37,8 +37,8 @@ def draw_text(text, font, text_col, x, y):
 
 def draw_grid():
     for line in range (0, 20): # Definerer antallet kolonner med blokker vi vil dele inn skjermen i
-        pg.draw.line(surface, (225, 255, 255), (0, line * tile_size), (WIDTH, line * tile_size))
-        pg.draw.line(surface, (225, 255, 255), (line * tile_size, 0), (line * tile_size, HEIGHT))
+        pg.draw.line(surface, (225, 255, 255), (0, line * tile_size), (WIDTH, line * tile_size), width = 0)
+        pg.draw.line(surface, (225, 255, 255), (line * tile_size, 0), (line * tile_size, HEIGHT), width = 0)
 
 
 class Button():
@@ -179,15 +179,13 @@ class Player():
             if self.rect.y > -800:
                 self.rect.y -= 5 # Avataren "flyter" opp til toppen av skjermen og ut av bildet
 
-# Kanskje det skal skje noe annet med ham når han dør?
-# I videoen blir avataren et spøkelse, så da passer det jo fint at han "flyter" til toppen
             
             """if self.rect.bottom > HEIGHT:
                 self.rect.bottom = HEIGHT
                 dy = 0""" # Brukte denne i starten, så ikke avataren skulle falle ned gjennom bunnen av skjermen 
         
         surface.blit(self.image, self.rect)
-        pg.draw.rect(surface, (255, 255, 255), self.rect, 2)# Tegner rektangelet som utgjør omrisset rundt spillavataren, synliggjør kollisjonene
+        #pg.draw.rect(surface, (255, 255, 255), self.rect, 2)# Tegner rektangelet som utgjør omrisset rundt spillavataren, synliggjør kollisjonene
         
         return game_over # Returnerer en evt. ny verdi for game_over-variablen, som hvis avataren treffer lavaen
         
@@ -265,7 +263,7 @@ class World():
     def draw(self):
         for tile in self.tile_list:
             surface.blit(tile[0], tile[1])
-            pg.draw.rect(surface, (255, 255, 255), tile[1], 2) # Tegner omrisset rundt alle blokkene, synliggjør kollisjoner
+            #pg.draw.rect(surface, (255, 255, 255), tile[1], 1) # Tegner omrisset rundt alle blokkene, synliggjør kollisjoner
             
     
 class Lava(pg.sprite.Sprite):
@@ -304,19 +302,33 @@ class Exit(pg.sprite.Sprite):
 # 4 = dør
 # 5 = mynter
 
-world_data =[
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0],
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 4, 0],
-[2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 3, 3, 2, 0, 0, 0, 2, 2],
-[2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
-]
+if level_count == 1:
+    world_data =[
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 4, 0],
+    [2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 3, 3, 2, 0, 0, 0, 2, 2],
+    [1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
+    ]
 
+if level_count == 2:
+    world_data =[
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0],
+    [0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 4, 0],
+    [2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 3, 3, 3, 3, 2, 0, 0, 0, 2, 2],
+    [1, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1],
+    ]
 
 player = Player(100, HEIGHT - 300)
 lava_group = pg.sprite.Group()
@@ -379,10 +391,9 @@ while run == True:
                 game_over = 0 # Endrer game_over-variablen til 0 igjen, så spillet kjøres fra begynnelsen
                 score = 0
         
-        #Hvis spiller har gjort ferdig ett level
+        # Hvis spiller har gjort ferdig et level
         if game_over == 1:
-            #level += 1
-            run = False
+            start_menu = True
             
         """
             if level <= max_levels:
