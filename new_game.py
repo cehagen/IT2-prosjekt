@@ -16,9 +16,9 @@ font_score = pg.font.SysFont('Bauhaus 93', 30)
 
 FPS = 60
 clock = pg.time.Clock()
-tile_size = 70
-game_over = 0 # Lager en funksjon som gjør det mulig at avataren dør
-start_menu = True # Definerer start_menu som True, slik at vi får opp startmenyen når man runner koden
+tile_size = 70 # Deler inn skjermen i mange kvadrater, hver av sidene i kvadratene har lengde 70
+game_over = 0 # Lager en funksjon som brukes når avataren dør
+start_menu = True # Definerer start_menu som True, slik at vi får opp startmenyen når man kjører koden
 
 
 bb = pg.image.load('background.png')
@@ -166,7 +166,7 @@ class Player():
             # Sjekker for kollisjon mellom spilleren (self) og hver av lava-blokkene (som alle ligger i lava-group)
             if pg.sprite.spritecollide(self, lava_group, False):
                 game_over -= 1
-                # print(game_over) Brukte denne i starten for å se koden fungerte, og kollisjonene ble registrert
+                # print(game_over) Brukte dette i starten for å se koden fungerte, og kollisjonene ble registrert
 
             self.rect.x += dx
             self.rect.y += dy
@@ -332,9 +332,9 @@ world = World(world_data)
 
 
 # Lager knappene
-restart_button = Button(WIDTH //2 - 200, HEIGHT // 4 , restart_img)
+restart_button = Button(WIDTH //2 - 550, HEIGHT // 4 , restart_img)
 start_button = Button(WIDTH //2 - 550, HEIGHT // 4, start_img)
-exit_button = Button(WIDTH //2 + 250, HEIGHT // 4, exit_img)
+exit_button = Button(WIDTH //2 + 175, HEIGHT // 4, exit_img)
 
 
 run = True
