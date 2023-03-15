@@ -34,6 +34,7 @@ win_img = pg.image.load('win_background.png') #Hentet fra https://opengameart.or
 
 
 level_count = 1
+kill_count = 0
 score = 0
 white = (255, 255, 255)
 black = (0,0,0)
@@ -403,6 +404,7 @@ while run == True:
                 player.reset(100, HEIGHT - 300)
                 game_over = 0 # Endrer game_over-variablen til 0 igjen, så spillet kjøres fra begynnelsen
                 score = 0
+                kill_count += 1
         
         # Hvis spiller har gjort ferdig et level
         if game_over == 1:
@@ -467,6 +469,7 @@ while run == True:
                 player = Player(100, HEIGHT + 300)
                 draw_text('Du har rundet spillet! Gratulerer', font_score, blue, 400, 200)
                 draw_text('Poeng: ' + str(score), font_score, black, 600, 300)
+                draw_text(f'Du døde {kill_count} ganger', font_score, blue, 550, 400)
 
         game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
         draw_grid()
