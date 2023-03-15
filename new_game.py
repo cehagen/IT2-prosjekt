@@ -7,7 +7,7 @@ from pygame.locals import *
 pg.init() 
 
 
-bakgrunnsmusikk = pg.mixer.Sound('game_music.wav')
+bakgrunnsmusikk = pg.mixer.Sound('game_music.wav') # Hentet fra https://opengameart.org/content/80s-background-music
 bakgrunnsmusikk.play()
 
 
@@ -346,10 +346,6 @@ coin_group = pg.sprite.Group()
 exit_group = pg.sprite.Group()
 
 
-# Vi kan bruke dette senere når vi skal lage flere leveler
-# Henter data fra mappen med leveler
-# Pickle_in = open(caroline1_data, 'rb')
-# World_data = pickle.load(pickle_in)
 world = World(world_data) 
 
 
@@ -411,7 +407,6 @@ while run == True:
             level_count += 1
             
             if level_count <= 3:
-                #reset level
                 world_data = []
                 
                 if level_count == 1:
@@ -463,13 +458,13 @@ while run == True:
                 
                 
             else:
-                #restart spill
+                # Restart spill
                 surface.blit(win_img,(0,0))
                 win_img = pg.transform.scale(win_img, (1400,700))
                 player = Player(100, HEIGHT + 300)
                 draw_text('Du har rundet spillet! Gratulerer', font_score, blue, 400, 200)
                 draw_text('Poeng: ' + str(score), font_score, black, 600, 300)
-                draw_text(f'Du døde {kill_count} ganger', font_score, blue, 550, 400)
+                draw_text(f'Du døde {kill_count} ganger', font_score, blue, 530, 400)
 
         game_over = player.update(game_over) # Ny verdi for game_over-funksjonen
         draw_grid()
