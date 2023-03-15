@@ -7,6 +7,10 @@ from pygame.locals import *
 pg.init() 
 
 
+bakgrunnsmusikk = pg.mixer.Sound('game_music.wav')
+bakgrunnsmusikk.play()
+
+
 global WIDTH, HEIGHT
 WIDTH = 1400
 HEIGHT = 700
@@ -90,7 +94,9 @@ class Button():
     
 class Player():
     def __init__(self, x, y):
-        self.reset(x, y)                                    
+        self.reset(x, y)
+        self.x = x
+        self.y = y
 
 
     def update(self, game_over): # Legger inn game_over som et argument i update-funksjonen, siden det er en global variabel
@@ -299,7 +305,7 @@ class Coin(pg.sprite.Sprite):
         img = pg.image.load('coin.png') # Hentet fra https://opengameart.org/content/2-seamless-lava-tiles 
         self.image = pg.transform.scale(img, (tile_size//2, tile_size//2))
         self.rect = self.image.get_rect()
-        self.rect.center = (x,y) #gjør at vi posisjonerer fra midtpunktet av mynten
+        self.rect.center = (x,y) # Gjør at vi posisjonerer fra midtpunktet av mynten
 
 
 class Exit(pg.sprite.Sprite):
