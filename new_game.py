@@ -1,8 +1,5 @@
 import pygame as pg
 from pygame.locals import *
-#import pickle
-#from os import path
-
 
 pg.init() 
 
@@ -385,11 +382,7 @@ while run == True:
             draw_text('Poeng: ' + str(score), font_score, white, tile_size - 10, 10)
         
         gamer_over = player.update(game_over)
-        
-        """
-        if Player > 700:
-            game_over = -1
-        """
+       
         # Hvis avataren dør
         if game_over == -1:
             
